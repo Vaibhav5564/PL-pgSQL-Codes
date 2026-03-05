@@ -1,10 +1,10 @@
-create table info(name varchar(10), surName varchar(10));
-insert into info values('Vaibhav', 'Adsul');
-insert into info values('Satyam', 'Adsul');
-insert into info values('Sushant', 'Adsul');
-insert into info values('Karan', 'Adsul');
-insert into info values('Sanket', 'Sul');
-insert into info values('Saurabh', 'Sul');
+-- create table info(name varchar(10), surName varchar(10));
+-- insert into info values('Vaibhav', 'Adsul');
+-- insert into info values('Satyam', 'Adsul');
+-- insert into info values('Sushant', 'Adsul');
+-- insert into info values('Karan', 'Adsul');
+-- insert into info values('Sanket', 'Sul');
+-- insert into info values('Saurabh', 'Sul');
 
 -- create or replace function printName1(n varchar(10)) returns text as
 -- $$
@@ -181,3 +181,29 @@ insert into info values('Saurabh', 'Sul');
 -- select forLoop(10) as sum_of_even_no_upto_n;
 
 
+-- create or replace function hi_lo(IN a numeric, IN b numeric, In c numeric, out hi numeric, out lo numeric) as
+-- $$
+-- begin
+-- hi := greatest(a, b, c);
+-- lo := least(a, b, c);
+-- end;
+-- $$
+-- language 'plpgsql';
+
+-- select hi_lo(34, 45, 20);
+
+
+-- create or replace function raise_eg() returns void as
+-- $$
+-- declare 
+-- i int := 1;
+-- begin
+-- i := 1 + 1;
+-- raise notice 'raise_eg() fun Started';
+-- raise notice 'Value of i changed to %', i;
+-- raise 'Function Aborted' using hint = 'Dont Increase i Value';
+-- end;
+-- $$
+-- language 'plpgsql';
+
+-- select raise_eg();
