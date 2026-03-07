@@ -205,3 +205,206 @@ Create the above database in PostGreSQL and insert sufficient records.
 -- language 'plpgsql';
 
 -- select bmonth(11);
+
+
+-- b)
+-- create or replace function disNames(atype varchar(20)) returns text as
+-- $$
+-- declare
+-- rec record;
+-- cur cursor for select p.* from Area a join Person p on a.aid = p.aid where area_type = atype;
+-- txt text := '';
+-- begin
+-- open cur;
+-- loop
+-- fetch cur into rec;
+-- exit when not found;
+-- txt := txt||rec.name||e'\n';
+-- end loop;
+-- close cur;
+-- return txt;
+-- end;
+-- $$
+-- language 'plpgsql';
+
+-- select disNames('urban');
+
+
+-- c)
+-- create or replace function midPerson(a money, b money) returns text as 
+-- $$
+-- declare
+-- n varchar(10);
+-- txt text := '';
+-- begin 
+-- for n in select name from Person where income between a and b loop
+-- txt := txt||n||e'\n';
+-- end loop;
+-- return txt;
+-- end;
+-- $$
+-- language 'plpgsql';
+
+-- select midPerson('50000', '1000000');
+
+
+
+--                                                  Set D
+
+/*
+Student – Competition Database 
+ Consider the following entities and their relationship.
+ Student (s_reg_no int, s_name varchar(20), s_class varchar(20))
+ Competition (comp_no int, comp_name varchar(20), comp_type varchar(20))
+Relationship between Student and Competition is many-to-many with descriptive attribute rank and 
+year.
+*/
+
+-- create table Student(sno int primary key, sname varchar(20), sclass varchar(20));
+-- create table Competition(cno int primary key, cname varchar(20), ctype varchar(20));
+-- create table Student_Competition(sno int references Student(sno), cno int references Competition(cno), rnk int, yr int);
+
+-- insert into Student values(1, 'Vaibhav', 'SY');
+-- insert into Student values(2, 'Sanket', 'SY');
+-- insert into Student values(3, 'Mrunal', 'FY');
+
+-- insert into Competition values(101, 'Coding', 'Inter Colligiate');
+-- insert into Competition values(102, 'Mind Mash', 'College Only');
+-- insert into Competition values(103, 'Treasure Hunt', 'Universal');
+
+-- insert into Student_Competition values(1, 101, 1, 2026);
+-- insert into Student_Competition values(2, 102, 3, 2026);
+-- insert into Student_Competition values(3, 103, 5, 2024);
+
+
+-- a) Write a cursor which will display year wise details of competitions held. (Use 
+-- parameterized cursor)
+-- b) Write a cursor which will display student wise total count of competition participated.
+
+
+-- a)
+-- create or replace function disInfo(y int) returns text as 
+-- $$
+-- declare 
+-- rec record;
+-- txt text := '';
+-- cur cursor for select * from Competition c join Student_Competition sc on c.cno = sc.cno where sc.yr = y;
+-- begin
+-- open cur;
+-- loop
+-- fetch cur into rec;
+-- exit when not found; 
+-- txt := txt||rec.cno||' '||rec.cname||' '||rec.ctype||e'\n';
+-- end loop;
+-- close cur;
+-- return txt;
+-- end;
+-- $$
+-- language 'plpgsql';
+
+-- select disInfo(2026);
+
+
+-- b)
+-- create or replace function countComp() returns text as
+-- $$
+-- declare
+-- rec record;
+-- txt text := '';
+-- cur cursor for select s.*, count(*) from Student s join Student_Competition sc on s.sno = sc.sno group by s.sno order by s.sno;
+-- begin
+-- open cur;
+-- loop
+-- fetch cur into rec;
+-- exit when not found;
+-- txt := txt||rec.sno||' '||rec.sname||' '||rec.sclass||' '||rec.count||e'\n';
+-- end loop;
+-- close cur;
+-- return txt;
+-- end;
+-- $$
+-- language 'plpgsql';
+
+-- select countComp();
+
+
+
+--                                                    Set E
+/*
+Car – Driver Database 
+Consider the following database:
+Car (c_no int, owner varchar(20), model varchar(10), color varchar(10)
+Driver (driver_no int, driver_namevarchar(20), license_no int, d_age int, salary float) 
+Car and Driver are related with many to many relationship
+Create the above database in PostGreSQL and insert sufficient records.
+*/
+
+-- create table Car(cno int primary key, owner varchar(20), model varchar(100), color varchar(10));
+-- create table Driver (dno int primary key, dname varchar(20), lno int, dage int, salary float);
+-- create table Car_Driver(cno int references Car(cno), dno int references Driver(dno));
+
+-- insert into Car values(1, 'Vaibhav', 'Defender', 'black');
+-- insert into Car values(2, 'Sanket', 'Defender', 'black');
+-- insert into Car values(3, 'Jeet', 'Vitara Breeza', 'white');
+
+-- insert into Driver values(101, 'Vaibhav', 11, 21, 200000);
+-- insert into Driver values(102, 'Sanket', 12, 21, 100000);
+-- insert into Driver values(103, 'Karan', 13, 21, 20000);
+
+-- insert into Car_Driver values(1, 101);
+-- insert into Car_Driver values(2, 102);
+-- insert into Car_Driver values(3, 101);
+
+-- a. Write a stored function with cursor which accepts the color and prints the names of all 
+-- owners who own a car of that color.
+-- b. Write a cursor which accepts the driver name and prints the details of all cars that
+-- this driver has driven, if the driver name is invalid, print an appropriate message.
+
+
+-- a)
+-- create or replace function colorMatch(clr varchar(10)) returns text as
+-- $$
+-- declare 
+-- txt text := '';
+-- rec record;
+-- cur cursor for select owner from Car where color = clr;
+-- begin
+-- open cur;
+-- loop
+-- fetch cur into rec;
+-- exit when not found;
+-- txt := txt||rec||e'\n';
+-- end loop;
+-- close cur;
+-- return txt;
+-- end;
+-- $$
+-- language 'plpgsql';
+
+-- select colorMatch('black');
+
+
+-- b)
+-- create or replace function carDetails(dr varchar(10)) returns text as
+-- $$
+-- declare 
+-- txt text := '';
+-- rec record;
+-- cur cursor for select c.* from Car c join Car_Driver cd on cd.cno = c.cno join Driver d on cd.dno = d.dno where  dname = dr;
+-- begin
+-- open cur;
+-- loop
+-- fetch cur into rec;
+-- exit when not found;
+-- txt := txt||rec||e'\n';
+-- end loop;
+-- close cur;
+-- if txt = '' then
+-- raise exception 'Driver Not Found Please Enter Valid Driver Name';
+-- end if;
+-- return txt;
+-- end;
+-- $$
+-- language 'plpgsql';
+
+-- select carDetails('Vibhav');
